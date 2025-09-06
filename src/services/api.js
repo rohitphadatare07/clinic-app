@@ -231,4 +231,29 @@ export const apiService = {
       return { success: false, message: 'Search failed' };
     }
   },
+  // Get monthly patient statistics
+  getMonthlyPatientStats: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/patients/monthly-stats`, {
+        headers: {
+          ...getAuthHeader(),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Get monthly stats error:', error);
+      return { 
+        success: false, 
+        message: 'Failed to fetch monthly statistics',
+        data: null
+      };
+    }
+  }
 };
+

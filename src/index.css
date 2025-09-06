@@ -290,14 +290,6 @@ p {
 }
 
 /* Login Styles */
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
-  padding: var(--spacing-4);
-}
 
 .login-form {
   background: var(--surface);
