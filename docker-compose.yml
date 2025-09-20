@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: myapp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: clinic_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: myapppassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Only expose on localhost for security. Remove this if ONLY the backend needs access.
+    networks:
+      - app-network
+
+  # Node.js Backend API Service
+  backend:
+    build: ./clinic-backend
+    container_name: myapp_backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:myapppassword@db:5432/clinic_db
+      # Add any other environment variables your app needs (e.g., JWT_SECRET)
+    ports:
+      - "3001:3000" # Maps host port 3001 to container port 3000
+    depends_on:
+      - db
+    networks:
+      - app-network
+    # Uncomment the next line if your backend needs to run commands like 'prisma db push' on startup
+    # command: sh -c "npx prisma db push && npm start"
+
+  # React Frontend Service (with Nginx)
+  frontend:
+    build: ./clinic-app
+    container_name: myapp_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80" # The React app is now accessible on port 80 of the EC2 server
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+# Define a volume to persist database data
+volumes:
+  postgres_data:
+
+# Define a custom network for all services to communicate
+networks:
+  app-network:
+    driver: bridge
