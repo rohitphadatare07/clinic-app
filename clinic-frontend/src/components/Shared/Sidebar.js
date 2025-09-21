@@ -22,6 +22,11 @@ const Sidebar = () => {
       icon: '👥'
     },
     {
+      path: '/medicines', // Add medicines list
+      label: 'Medicines Inventory',
+      icon: '💊'
+    },
+    {
       path: '/appointments',
       label: 'Appointments',
       icon: '📅'

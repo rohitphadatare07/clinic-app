@@ -11,6 +11,8 @@ import Sidebar from './components/Shared/Sidebar';
 import PrivateRoute from './components/Shared/PrivateRoute';
 import NewPatient from './components/Patients/NewPatient';
 import { apiService } from './services/api';
+import MedicineForm from './components/Medicines/MedicineForm';
+import MedicinesList from './components/Medicines/MedicinesList';
 
 // Create an Auth Context to share user state
 export const AuthContext = createContext();
@@ -79,7 +81,9 @@ function App() {
                 <Route path="/patient/:id" element={<PatientProfile />} />
                 <Route path="/patients" element={<PatientList />} />
                 <Route path="/patient/:id/prescription/new" element={<CreatePrescription />} />
-                <Route path="/patient/new" element={<NewPatient />} />
+                <Route path="/patient/new" element={<NewPatient />} />                
+                <Route path="/medicines" element={<PrivateRoute><MedicinesList /></PrivateRoute>}/>
+                <Route path="/medicines/new" element={<PrivateRoute><MedicineForm /></PrivateRoute>}/>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<div className="container">Page not found</div>} />
               </Routes>

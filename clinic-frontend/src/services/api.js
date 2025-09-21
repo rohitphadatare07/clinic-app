@@ -1,6 +1,6 @@
 
-const API_BASE_URL = '/api';
-
+// const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 // Helper function to get auth header
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
@@ -254,6 +254,58 @@ export const apiService = {
         data: null
       };
     }
-  }
+  },
+  // Medicines API methods
+  getMedicines: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/medicines`, {
+        headers: {
+          ...getAuthHeader(),
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Get medicines error:', error);
+      return { success: false, message: 'Failed to fetch medicines' };
+    }
+  },
+
+  createMedicine: async (medicineData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/medicines`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify(medicineData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Create medicine error:', error);
+      return { success: false, message: 'Failed to create medicine' };
+    }
+  },
+
+  deleteMedicine: async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/medicines/${id}`, {
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeader(),
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Delete medicine error:', error);
+      return { success: false, message: 'Failed to delete medicine' };
+    }
+  },
 };
 

@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/clinic-backend/node_modules
+/clinic-frontend/node_modules
 /.pnp
 .pnp.js
 
