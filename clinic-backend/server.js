@@ -209,10 +209,10 @@ app.put('/api/patients/:id', authenticateToken, async (req, res) => {
 
     const result = await pool.query(
       `UPDATE patients 
-       SET name = $1, age = $2, weight = $3 gender = $4, contact_number = $5, email = $6, 
+       SET name = $1, age = $2, weight = $3, gender = $4, contact_number = $5, email = $6, 
            address = $7, blood_group = $8, allergies = $9, medical_history = $10,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $10 
+       WHERE id = $11
        RETURNING *`,
       [name, age, weight, gender, contact_number, email, address, blood_group, allergies, medical_history, id]
     );

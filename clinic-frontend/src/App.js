@@ -10,6 +10,7 @@ import Navbar from './components/Shared/Navbar';
 import Sidebar from './components/Shared/Sidebar';
 import PrivateRoute from './components/Shared/PrivateRoute';
 import NewPatient from './components/Patients/NewPatient';
+import EditPatient from './components/Patients/EditPatient';
 import { apiService } from './services/api';
 import MedicineForm from './components/Medicines/MedicineForm';
 import MedicinesList from './components/Medicines/MedicinesList';
@@ -81,6 +82,7 @@ function App() {
                 <Route path="/patient/:id" element={<PatientProfile />} />
                 <Route path="/patients" element={<PatientList />} />
                 <Route path="/patient/:id/prescription/new" element={<CreatePrescription />} />
+                <Route path="/patient/:id/edit" element={<EditPatient />} />
                 <Route path="/patient/new" element={<NewPatient />} />                
                 <Route path="/medicines" element={<PrivateRoute><MedicinesList /></PrivateRoute>}/>
                 <Route path="/medicines/new" element={<PrivateRoute><MedicineForm /></PrivateRoute>}/>
