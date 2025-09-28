@@ -2077,3 +2077,112 @@ canvas {
     gap: var(--spacing-2);
   }
 }
+/* Prescription Form Styles */
+.patient-info-card {
+  background: var(--surface);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  margin-bottom: var(--spacing-4);
+}
+
+.patient-info-card h3 {
+  margin: 0 0 var(--spacing-3) 0;
+  color: var(--text-primary);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.info-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Medicine Row Styles */
+.medicine-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1.5fr auto;
+  gap: var(--spacing-4);
+  align-items: start;
+  padding: var(--spacing-4);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-4);
+}
+
+.read-only {
+  background-color: var(--background);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.dosage-note {
+  color: var(--success);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-1);
+  display: block;
+}
+
+/* Alert Styles */
+.alert {
+  padding: var(--spacing-3);
+  border-radius: var(--radius);
+  margin: var(--spacing-2) 0;
+  font-weight: 500;
+}
+
+.alert-warning {
+  background: var(--warning-light);
+  color: var(--warning-dark);
+  border: 1px solid var(--warning);
+}
+
+.alert-success {
+  background: var(--success-light);
+  color: var(--success-dark);
+  border: 1px solid var(--success);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .medicine-row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .medicine-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .patient-info-card {
+    padding: var(--spacing-3);
+  }
+  
+  .medicine-row {
+    padding: var(--spacing-3);
+  }
+}

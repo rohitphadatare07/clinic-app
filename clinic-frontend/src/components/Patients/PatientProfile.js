@@ -105,6 +105,10 @@ const PatientProfile = () => {
               <span className="info-value">{patient.gender}</span>
             </div>
             <div className="info-item">
+              <span className="info-label">Weight:</span>
+              <span className="info-value">{patient.weight} Kg</span>
+            </div>
+            <div className="info-item">
               <span className="info-label">Blood Group:</span>
               <span className="info-value">{patient.blood_group || 'Not specified'}</span>
             </div>

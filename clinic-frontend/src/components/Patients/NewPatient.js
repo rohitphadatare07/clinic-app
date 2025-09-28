@@ -6,6 +6,7 @@ const NewPatient = () => {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
+    weight: '',
     gender: '',
     contact_number: '',
     email: '',
@@ -73,6 +74,19 @@ const NewPatient = () => {
               type="number"
               name="age"
               value={formData.age}
+              onChange={handleChange}
+              required
+              min="0"
+              max="120"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Weight *</label>
+            <input
+              type="number"
+              name="weight"
+              value={formData.weight}
               onChange={handleChange}
               required
               min="0"

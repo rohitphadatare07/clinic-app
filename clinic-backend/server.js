@@ -142,6 +142,7 @@ app.get('/api/patients', authenticateToken, async (req, res) => {
     const result = await pool.query(
       'SELECT * FROM patients ORDER BY created_at DESC'
     );
+    console.log('Fetched patients:', JSON.stringify(result.rows, null, 2));
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Get patients error:', error);
@@ -175,6 +176,7 @@ app.post('/api/patients', authenticateToken, async (req, res) => {
     const {
       name,
       age,
+      weight,
       gender,
       contact_number,
       email,
@@ -186,10 +188,10 @@ app.post('/api/patients', authenticateToken, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO patients 
-       (name, age, gender, contact_number, email, address, blood_group, allergies, medical_history) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+       (name, age, weight, gender, contact_number, email, address, blood_group, allergies, medical_history) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        RETURNING *`,
-      [name, age, gender, contact_number, email, address, blood_group, allergies, medical_history]
+      [name, age, weight, gender, contact_number, email, address, blood_group, allergies, medical_history]
     );
 
     res.json({ success: true, data: result.rows[0] });
@@ -203,16 +205,16 @@ app.post('/api/patients', authenticateToken, async (req, res) => {
 app.put('/api/patients/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, age, gender, contact_number, email, address, blood_group, allergies, medical_history } = req.body;
+    const { name, age, weight, gender, contact_number, email, address, blood_group, allergies, medical_history } = req.body;
 
     const result = await pool.query(
       `UPDATE patients 
-       SET name = $1, age = $2, gender = $3, contact_number = $4, email = $5, 
-           address = $6, blood_group = $7, allergies = $8, medical_history = $9,
+       SET name = $1, age = $2, weight = $3 gender = $4, contact_number = $5, email = $6, 
+           address = $7, blood_group = $8, allergies = $9, medical_history = $10,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $10 
        RETURNING *`,
-      [name, age, gender, contact_number, email, address, blood_group, allergies, medical_history, id]
+      [name, age, weight, gender, contact_number, email, address, blood_group, allergies, medical_history, id]
     );
 
     if (result.rows.length === 0) {
@@ -248,129 +250,138 @@ app.delete('/api/patients/:id', authenticateToken, async (req, res) => {
 
 // Get all prescriptions for a patient
 app.get('/api/patients/:patientId/prescriptions', authenticateToken, async (req, res) => {
-    try {
-      const { patientId } = req.params;
-      
-      const result = await pool.query(
-        `SELECT p.*, 
-                json_agg(
-                  json_build_object(
-                    'id', pm.id,
-                    'medicine_name', pm.medicine_name,
-                    'dosage', pm.dosage,
-                    'frequency', pm.frequency,
-                    'duration', pm.duration,
-                    'instructions', pm.instructions
-                  )
-                ) as medicines
-         FROM prescriptions p
-         LEFT JOIN prescription_medicines pm ON p.id = pm.prescription_id
-         WHERE p.patient_id = $1
-         GROUP BY p.id
-         ORDER BY p.prescribed_date DESC`,
-        [patientId]
-      );
-  
-      res.json({ success: true, data: result.rows });
-    } catch (error) {
-      console.error('Get prescriptions error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  try {
+    const { patientId } = req.params;
+    
+    const result = await pool.query(
+      `SELECT p.*, 
+              json_agg(
+                json_build_object(
+                  'id', pm.id,
+                  'medicine_id', pm.medicine_id,
+                  'medicine_name', pm.medicine_name,
+                  'dosage', pm.dosage,
+                  'frequency', pm.frequency,
+                  'duration', pm.duration,
+                  'instructions', pm.instructions
+                )
+              ) as medicines
+       FROM prescriptions p
+       LEFT JOIN prescription_medicines pm ON p.id = pm.prescription_id
+       WHERE p.patient_id = $1
+       GROUP BY p.id
+       ORDER BY p.created_at DESC`,
+      [patientId]
+    );
+
+    // Transform the data to ensure medicines is always an array
+    const transformedData = result.rows.map(row => ({
+      ...row,
+      medicines: row.medicines && row.medicines[0] ? row.medicines : []
+    }));
+
+    res.json({ success: true, data: transformedData });
+  } catch (error) {
+    console.error('Get prescriptions error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-  
+
 // Get single prescription
 app.get('/api/prescriptions/:id', authenticateToken, async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      const prescriptionResult = await pool.query(
-        `SELECT p.*, 
-                json_build_object(
-                  'id', pat.id,
-                  'name', pat.name,
-                  'age', pat.age,
-                  'gender', pat.gender
-                ) as patient
-         FROM prescriptions p
-         JOIN patients pat ON p.patient_id = pat.id
-         WHERE p.id = $1`,
-        [id]
-      );
-  
-      if (prescriptionResult.rows.length === 0) {
-        return res.status(404).json({ error: 'Prescription not found' });
-      }
-  
-      const medicinesResult = await pool.query(
-        'SELECT * FROM prescription_medicines WHERE prescription_id = $1 ORDER BY id',
-        [id]
-      );
-  
-      const prescription = {
-        ...prescriptionResult.rows[0],
-        medicines: medicinesResult.rows
-      };
-  
-      res.json({ success: true, data: prescription });
-    } catch (error) {
-      console.error('Get prescription error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+  try {
+    const { id } = req.params;
+    
+    const prescriptionResult = await pool.query(
+      `SELECT p.*, 
+              json_build_object(
+                'id', pat.id,
+                'name', pat.name,
+                'age', pat.age,
+                'weight', pat.weight,
+                'gender', pat.gender
+              ) as patient
+       FROM prescriptions p
+       JOIN patients pat ON p.patient_id = pat.id
+       WHERE p.id = $1`,
+      [id]
+    );
+
+    if (prescriptionResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Prescription not found' });
     }
+
+    const medicinesResult = await pool.query(
+      `SELECT id, medicine_id, medicine_name, dosage, frequency, duration, instructions
+       FROM prescription_medicines 
+       WHERE prescription_id = $1 
+       ORDER BY id`,
+      [id]
+    );
+
+    const prescription = {
+      ...prescriptionResult.rows[0],
+      medicines: medicinesResult.rows
+    };
+
+    res.json({ success: true, data: prescription });
+  } catch (error) {
+    console.error('Get prescription error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
-  
+
 // Create new prescription
 app.post('/api/prescriptions', authenticateToken, async (req, res) => {
-    const client = await pool.connect();
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
     
-    try {
-      await client.query('BEGIN');
-      
-      const { patient_id, diagnosis, additional_notes, next_visit_date, medicines } = req.body;
-  
-      // Insert prescription
-      const prescriptionResult = await client.query(
-        `INSERT INTO prescriptions 
-         (patient_id, diagnosis, additional_notes, next_visit_date) 
-         VALUES ($1, $2, $3, $4) 
-         RETURNING *`,
-        [patient_id, diagnosis, additional_notes, next_visit_date]
-      );
-  
-      const prescription = prescriptionResult.rows[0];
-  
-      // Insert medicines
-      if (medicines && medicines.length > 0) {
-        for (const medicine of medicines) {
-          await client.query(
-            `INSERT INTO prescription_medicines 
-             (prescription_id, medicine_name, dosage, frequency, duration, instructions) 
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [
-              prescription.id,
-              medicine.name,
-              medicine.dosage,
-              medicine.frequency,
-              medicine.duration,
-              medicine.instructions
-            ]
-          );
-        }
+    const { patient_id, diagnosis, additional_notes, next_visit_date, medicines } = req.body;
+
+    // Insert prescription
+    const prescriptionResult = await client.query(
+      `INSERT INTO prescriptions 
+       (patient_id, diagnosis, additional_notes, next_visit_date) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [patient_id, diagnosis, additional_notes, next_visit_date]
+    );
+
+    const prescription = prescriptionResult.rows[0];
+
+    // Insert medicines with medicine_id
+    if (medicines && medicines.length > 0) {
+      for (const medicine of medicines) {
+        await client.query(
+          `INSERT INTO prescription_medicines 
+           (prescription_id, medicine_id, medicine_name, dosage, frequency, duration, instructions) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            prescription.id,
+            medicine.medicine_id,
+            medicine.medicine_name,
+            medicine.dosage,
+            medicine.frequency,
+            medicine.duration,
+            medicine.instructions
+          ]
+        );
       }
-  
-      await client.query('COMMIT');
-      
-      // Get the complete prescription with medicines
-      const completePrescription = await getCompletePrescription(client, prescription.id);
-      
-      res.json({ success: true, data: completePrescription });
-      
-    } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('Create prescription error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    } finally {
-      client.release();
     }
+
+    await client.query('COMMIT');
+    
+    res.json({ success: true, data: prescription });
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Create prescription error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
 });
   
 // Helper function to get complete prescription

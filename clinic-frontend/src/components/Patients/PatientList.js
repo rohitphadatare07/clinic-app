@@ -125,6 +125,7 @@ const PatientList = () => {
               <th>Name</th>
               <th>Age</th>
               <th>Gender</th>
+              <th>Weight</th>
               <th>Contact</th>
               <th>Last Visit</th>
               <th>Actions</th>
@@ -150,6 +151,7 @@ const PatientList = () => {
                   </td>
                   <td>{patient.age || 'N/A'}</td>
                   <td>{patient.gender || 'N/A'}</td>
+                  <td>{patient.weight || 'N/A'}</td>
                   <td>
                     {patient.contact_number || 'No contact'}
                     {patient.blood_group && (
