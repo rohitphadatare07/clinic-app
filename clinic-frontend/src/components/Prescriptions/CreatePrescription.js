@@ -68,24 +68,22 @@ const CreatePrescription = () => {
   };
 
   const calculateDosage = (medicine) => {
-    if (!patient || !patient.weight || !medicine.strength) {
+    if (!patient || !patient.weight || !medicine.common_dosage) {
       return medicine.common_dosage || '';
     }
 
     try {
       const weight = parseFloat(patient.weight);
-      // if (isNaN(weight) || weight <= 0) return medicine.common_dosage;
+      if (isNaN(weight) || weight <= 0) return medicine.common_dosage;
 
       // Extract numeric value from common_dosage (e.g., "500mg" -> 500)
-      // const dosageMatch = medicine.common_dosage.match(/(\d+\.?\d*)\s*mg/i);
-      console.log('medicine.strength', medicine.strength);
-      const dosageMatch = medicine.strength.match(/(\d+\.?\d*)\s*mg/i);
+      const dosageMatch = medicine.common_dosage.match(/(\d+\.?\d*)\s*mg/i);
       console.log('dosageMatch', dosageMatch);
-      // if (!dosageMatch) return medicine.common_dosage;
-      const baseDosage = dosageMatch ? dosageMatch[1] : null;
-      // const baseDosage = parseFloat(dosageMatch[1]);
+      if (!dosageMatch) return medicine.common_dosage;
+
+      const baseDosage = parseFloat(dosageMatch[1]);
       console.log('baseDosage', baseDosage);
-      // if (isNaN(baseDosage)) return medicine.common_dosage;
+      if (isNaN(baseDosage)) return medicine.common_dosage;
 
       // Calculate dosage based on weight (for pediatric patients)
       let calculatedDosage = baseDosage;
